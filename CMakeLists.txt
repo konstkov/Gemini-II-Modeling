@@ -11,6 +11,7 @@
 cmake_minimum_required(VERSION 4.0.0)
 
 set (PROJECT_NAME "gemini-ii-modeling")
+set (COMPANY_NAME "KonstantinKovalev")
 set (CURRENT_VERSION "0.0.1")
 set (PRODUCT_NAME "gemini-ii-modeling")
 set (FORMATS Standalone AU VST3)
@@ -54,7 +55,7 @@ list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/modules/cmake-includ
 juce_add_plugin("${PROJECT_NAME}"    # Set this if the plugin version is different to the project version
 COMPANY_NAME "${COMPANY_NAME}"    # ICON_* arguments specify a path to an image file to use as an icon for the Standalone
 BUNDLE_ID "${BUNDLE_ID}"
-COPY_PLUGIN_AFTER_BUILD FALSE PLUGIN_MANUFACTURER_CODE Vdsp    # Specify the name of the plugin's author
+COPY_PLUGIN_AFTER_BUILD TRUE PLUGIN_MANUFACTURER_CODE Vdsp    # Specify the name of the plugin's author
 PLUGIN_CODE Agii    # Is this a synth or an effect?
 FORMATS ${FORMATS}    # Does the plugin need midi input?
 PRODUCT_NAME "$PRODUCT_NAME}"    # Does the plugin need midi output?
@@ -65,7 +66,7 @@ IS_SYNTH FALSE    # A four-character manufacturer id with at least one upper-cas
     # A unique four-character plugin id with exactly one upper-case character
                                                 # GarageBand 10.3 requires the first letter to be upper-case, and the remaining letters to be lower-case
 FORMATS AU VST3 Standalone                  # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
-PRODUCT_NAME "Audio Plugin Example"         # The name of the final executable, which can differ from the target name
+PRODUCT_NAME "GeminiIIModeling"         # The name of the final executable, which can differ from the target name
 )
 
 # `juce_generate_juce_header` will create a JuceHeader.h for a given target, which will be generated
@@ -95,12 +96,12 @@ target_sources(gemini-ii-modeling
 # definitions will be visible both to your code, and also the JUCE module code, so for new
 # definitions, pick unique names that are unlikely to collide! This is a standard CMake command.
 
-#target_compile_definitions(AudioPluginExample
-#    PUBLIC
-        # JUCE_WEB_BROWSER and JUCE_USE_CURL would be on by default, but you might not need them.
+target_compile_definitions(gemini-ii-modeling
+   PUBLIC
+#         JUCE_WEB_BROWSER and JUCE_USE_CURL would be on by default, but you might not need them.
 #        JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_plugin` call
 #        JUCE_USE_CURL=0     # If you remove this, add `NEEDS_CURL TRUE` to the `juce_add_plugin` call
-#        JUCE_VST3_CAN_REPLACE_VST2=0)
+        JUCE_VST3_CAN_REPLACE_VST2=0)
 
 # If your target needs extra binary assets, you can add them here. The first argument is the name of
 # a new static library target that will include all the binary resources. There is an optional
@@ -130,13 +131,13 @@ target_include_directories(SharedCode INTERFACE
 )
 
 target_compile_definitions (SharedCode INTERFACE
-        LUCE GLOBAL_MODULE_SETTINGS_INCLUDED=1
-        LUCE WEB_BROWSER=1
-        LUCE SECURL
-        LUCE_VST3_CAN_REPLACE_VST2=0
+        juce GLOBAL_MODULE_SETTINGS_INCLUDED=1
+        juce WEB_BROWSER=1
+        juce SECURL
+        juce_VST3_CAN_REPLACE_VST2=0
         CMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}"
         VERSION="${CURRENT_VERSION}"
-        LUCE DISPLAY_SPLASH_SCREEN=0
+        juce DISPLAY_SPLASH_SCREEN=0
         PRODUCT_NAME_WITHOUT_VERSION="CometChannelStrip"
         X. 46
 )
@@ -157,9 +158,23 @@ file (GLOB_RECURSE Assets"${CMAKE_CURRENT_SOURCE_DIR}/assets/*.*")
 target_link_libraries("${PROJECT_NAME}"
     PRIVATE
         # AudioPluginData           # If we'd created a binary data target, we'd link to it here
+        juce::juce_audio_basics
+        juce::juce_audio_devices
+        juce::juce_audio_formats
+        juce::juce_audio_plugin_client
+        juce::juce_audio_processors
         juce::juce_audio_utils
+        juce::juce_core
+        juce::juce_data_structures
+        juce::juce_dsp
+        juce::juce_events
+        juce::juce_graphics
+        juce::juce_gui_basics
+        juce::juce_gui_extra
+        juce::juce_product_unlocking
     PUBLIC
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags
 )
+
