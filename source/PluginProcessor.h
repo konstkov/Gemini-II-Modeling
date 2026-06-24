@@ -2,6 +2,7 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_dsp/juce_dsp.h>
+#include <cmath>
 
 enum Slope
 {
@@ -16,16 +17,44 @@ struct ChainSettings
     float peakFreq { 0 }, peakGainInDecibels{ 0 }, peakQuality {1.f};
     float lowCutFreq { 0 }, highCutFreq { 0 };
     Slope lowCutSlope { Slope_12 }, highCutSlope { Slope_12 };
+    float volume { 0 };
 };
 
 ChainSettings getChainSettings (juce::AudioProcessorValueTreeState &apvts);
 
 //==============================================================================
+
+// class Distortion : public juce::AudioProcessor
+// {
+// public:
+//
+//     Distortion()
+//     {
+//
+//     }
+//
+// private:
+//
+//     juce::dsp::ProcessorChain<juce::dsp::Gain<float>, juce::dsp::WaveShaper<float>,
+//     juce::dsp::Gain<float>> processorChain; // [1]
+// };
+
 class AudioPluginAudioProcessor final : public juce::AudioProcessor
 {
 public:
+
     //==============================================================================
-    AudioPluginAudioProcessor();
+    // AudioPluginAudioProcessor()
+    // {
+    //     auto& waveshaper = leftChain.template get<waveshaperIndex>();
+    //     waveshaper.functionToUse = [] (const float x) {
+    //         return std::tanh (x); // [4]
+    //     };
+    //     auto& preGain = processorChain.template get<preGainIndex>(); // [5]
+    //     preGain.setGainDecibels (30.0f); // [6]
+    //     auto& postGain = processorChain.template get<postGainIndex>(); // [7]
+    //     postGain.setGainDecibels (-20.0f); // [8]
+    // }
     ~AudioPluginAudioProcessor() override;
 
     //==============================================================================
@@ -64,6 +93,7 @@ public:
     juce::AudioProcessorValueTreeState apvts {*this, nullptr, "Parameters", createParameterLayout()};
 
 private:
+
     using Filter = juce::dsp::IIR::Filter<float>;
 
     using CutFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;
@@ -73,6 +103,12 @@ private:
     using Coefficients = Filter::CoefficientsPtr;
 
     MonoChain leftChain, rightChain;
+
+    enum {
+        preGainIndex, // [2]
+        waveshaperIndex,
+        postGainIndex // [3]
+    };
 
     enum ChainPositions
     {
@@ -122,6 +158,11 @@ private:
             }
         }
     }
+
+    void updateLowCutFilters(const ChainSettings& chainSettings);
+    void updateHighCutFilters(const ChainSettings& chainSettings);
+
+    void updateFilters();
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginAudioProcessor);
